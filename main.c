@@ -79,6 +79,25 @@ void Cpu_tick(Cpu* this)
       snprintf(op_str, 128, "LDA $%02X", pc_ptr[1]);
       break;
     }
+    case OP_STA_ZERO_PAGE:
+    {
+      this->mem->data[pc_ptr[1]] = this->a;
+      this->pc += 2;
+      this->cycles += 3;
+
+      snprintf(op_str, 128, "STA $%02X", pc_ptr[1]);
+      break;
+    }
+    case OP_STA_ABSOLUTE:
+    {
+      const uint16_t addr = pc_ptr[1] | (pc_ptr[2] << 8);
+      this->mem->data[addr] = this->a;
+      this->pc += 3;
+      this->cycles += 4;
+
+      snprintf(op_str, 128, "STA $%04X", addr);
+      break;
+    }
     default:
       break;
   }
@@ -100,8 +119,20 @@ int main() {
   mem.data[p++] = 0x99;
   mem.data[p++] = OP_LDA_ZERO_PAGE;
   mem.data[p++] = 0x01;
+  mem.data[p++] = OP_STA_ZERO_PAGE;
+  mem.data[p++] = 0x02;
+  mem.data[p++] = OP_LDA_IMMEDIATE;
+  mem.data[p++] = 0xff;
+  mem.data[p++] = OP_STA_ABSOLUTE;
+  mem.data[p++] = 0x34;
+  mem.data[p++] = 0x12;
   Cpu_tick(&c);
   Cpu_tick(&c);
+  Cpu_tick(&c);
+  Cpu_tick(&c);
+  Cpu_tick(&c);
+
+  printf("\n%02x %02x", mem.data[0x02], mem.data[0x1234]);
 
   Cpu_dtor(&c);
   Mem_dtor(&mem);
