@@ -1,5 +1,7 @@
+#include <memory.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "opcodes.h"
 
@@ -106,6 +108,14 @@ void Cpu_tick(Cpu* this)
   printf("  \e[1;34m%s\e[0m", op_str);
 }
 
+void Cpu_run(Cpu* this)
+{
+  while(this->mem->data[this->pc] != 0)
+  {
+    Cpu_tick(this);
+  }
+}
+
 int main() {
   Mem mem;
   Mem_ctor(&mem, 0x10000);
@@ -113,24 +123,22 @@ int main() {
   Cpu_ctor(&c, &mem);
 
   Cpu_print(&c);
+
+  // Load memory values
   mem.data[0x01] = 0x77;
-  uint16_t p = 0x600;
-  mem.data[p++] = OP_LDA_IMMEDIATE;
-  mem.data[p++] = 0x99;
-  mem.data[p++] = OP_LDA_ZERO_PAGE;
-  mem.data[p++] = 0x01;
-  mem.data[p++] = OP_STA_ZERO_PAGE;
-  mem.data[p++] = 0x02;
-  mem.data[p++] = OP_LDA_IMMEDIATE;
-  mem.data[p++] = 0xff;
-  mem.data[p++] = OP_STA_ABSOLUTE;
-  mem.data[p++] = 0x34;
-  mem.data[p++] = 0x12;
-  Cpu_tick(&c);
-  Cpu_tick(&c);
-  Cpu_tick(&c);
-  Cpu_tick(&c);
-  Cpu_tick(&c);
+
+  // Load program
+  const uint8_t program[] = {
+      OP_LDA_IMMEDIATE, 0x99,
+      OP_LDA_ZERO_PAGE, 0x01,
+      OP_STA_ZERO_PAGE, 0x02,
+      OP_LDA_IMMEDIATE, 0xff,
+      OP_STA_ABSOLUTE, 0x34, 0x12
+  };
+  memcpy(mem.data + 0x600, program, sizeof(program));
+
+  // Run cpu
+  Cpu_run(&c);
 
   printf("\n%02x %02x", mem.data[0x02], mem.data[0x1234]);
 
