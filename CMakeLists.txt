@@ -3,4 +3,4 @@ project(my6502 C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(my6502 main.c)
+add_executable(my6502 main.c cpu.c mem.c)
