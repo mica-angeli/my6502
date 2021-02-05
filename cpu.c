@@ -65,6 +65,25 @@ void Cpu_tick(Cpu* this)
       snprintf(op_str, 128, "STA $%04X", addr);
       break;
     }
+    case OP_JMP_ABSOLUTE:
+    {
+      const uint16_t addr = pc_ptr[1] | (pc_ptr[2] << 8);
+      this->pc = addr;
+      this->cycles += 3;
+
+      snprintf(op_str, 128, "JMP $%04X", addr);
+      break;
+    }
+    case OP_JMP_INDIRECT:
+    {
+      const uint16_t indirect_addr = pc_ptr[1] | (pc_ptr[2] << 8);
+      const uint16_t addr = this->mem->data[indirect_addr] | (this->mem->data[indirect_addr + 1] << 8);
+      this->pc = addr;
+      this->cycles += 5;
+
+      snprintf(op_str, 128, "JMP $(%04X)", indirect_addr);
+      break;
+    }
     default:
       break;
   }

@@ -5,7 +5,7 @@
 
 #include "mem.h"
 
-struct Cpu
+struct
 {
   u_int16_t pc;
   u_int8_t sp;
@@ -24,6 +24,8 @@ typedef enum {
   OP_LDA_ZERO_PAGE = 0xa5,
   OP_STA_ZERO_PAGE = 0x85,
   OP_STA_ABSOLUTE  = 0x8d,
+  OP_JMP_ABSOLUTE  = 0x4c,
+  OP_JMP_INDIRECT  = 0x6c,
 } Opcodes;
 
 void Cpu_ctor(Cpu* this, Mem* mem);
